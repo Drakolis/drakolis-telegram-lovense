@@ -1,0 +1,24 @@
+{
+  "name": "drakolis-telegram-lovense",
+  "version": "1.0.0",
+  "description": "Telegram-Lovense integration (CLI)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "lovense",
+    "telegram"
+  ],
+  "author": "Mika Drakolis",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^6.4.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-plugin-import": "^2.18.2"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "tglib": "^3.0.2"
+  }
+}
