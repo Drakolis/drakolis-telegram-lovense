@@ -8,6 +8,8 @@ const isDev = require('electron-is-dev');
 
 let mainWindow;
 
+const ipcBus = require('./ipcBus');
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 900,
@@ -25,6 +27,7 @@ function createWindow() {
     // BrowserWindow.addDevToolsExtension('<location to your react chrome extension>');
     mainWindow.webContents.openDevTools();
   }
+  ipcBus(mainWindow);
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
