@@ -76,7 +76,6 @@ function ModalAuth({ pending, loggedIn, step, dispatch }) {
         <CardHeader title="Auth" />
         <CardContent>
           <FullWidthTextField
-            id="input-with-icon-textfield"
             label="Phone Number"
             disabled={step !== authSteps.NUMBER}
             InputProps={{

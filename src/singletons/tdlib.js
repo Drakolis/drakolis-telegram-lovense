@@ -1,70 +1,63 @@
-const { Client } = require('tglib');
-const chalk = require('chalk');
-const ipcEvents = require('../constants/ipcEvents');
-const authSteps = require('../constants/authSteps');
+const { Client } = require('tdl');
+const { TDLib } = require('tdl-tdlib-ffi');
 
 module.exports = new (class {
-  mainWindow = null;
+  phoneForLogin = '';
 
-  authCode = '';
+  codeForLogin = '';
 
-  client = null;
+  passwordForLogin = '';
 
-  login(phoneNumber) {
-    const authCode = new Promise(res => {
-      const interval = setInterval(() => {
-        if (this.authCode) {
-          res(this.authCode);
-          clearInterval(interval);
-        }
-      }, 1000);
+  firstNameForLogin = '';
+
+  lastNameForLogin = '';
+
+  constructor() {
+    this.client = new Client(new TDLib('./tdlib/lib/libtdjson.1.4.0.dylib'), {
+      apiId: 402920, // Your api_id
+      apiHash: '', // Your api_hash
+
+      databaseDirectory: './tdlib/application/db',
+      filesDirectory: './tdlib/application/files',
     });
 
-    this.client = new Client({
-      apiId: 402920,
-      apiHash: '',
-
-      appDir: './tdlib/application',
-      binaryPath: './tdlib/lib/libtdjson.1.4.0.dylib',
-    });
-
-    const defaultHandler = this.client.callbacks['td:getInput'];
-
-    this.client.registerCallback('td:update', update => {
-      console.log(JSON.stringify(update));
-      if (update['@type'] === 'updateOption' && update.name === 'authorization_date') {
-        this.mainWindow.send(ipcEvents.LOGIN_ALL_SUCCESS);
-      }
-    });
-
-    this.client.registerCallback('td:error', error => {
-      console.log(chalk.red(JSON.stringify(error)));
-      if (error.message === 'PHONE_NUMBER_INVALID') {
-        delete this.client;
-        console.log('TDLib destroyed');
-        this.mainWindow.send(ipcEvents.LOGIN_NUMBER_FAILURE);
-      }
-    });
-
-    this.client.registerCallback('td:getInput', async args => {
-      console.log(chalk.cyan(JSON.stringify(args)));
-      if (args.string === 'tglib.input.AuthorizationType') {
-        return 'user';
-      }
-      if (args.string === 'tglib.input.AuthorizationValue') {
-        return `+${phoneNumber}`;
-      }
-      if (args.string === 'tglib.input.AuthorizationCode') {
-        this.mainWindow.send(ipcEvents.LOGIN_NUMBER_SUCCESS, { step: authSteps.CODE });
-        return authCode;
-      }
-      return defaultHandler(args);
-    });
+    this.client.on('update', d => console.log('UPDATE: ', JSON.stringify(d)));
+    this.client.on('error', d => console.log('ERROR: ', JSON.stringify(d)));
+    this.client.on('destroy', d => console.log('DESTROY: ', JSON.stringify(d)));
+    this.client.on('auth-needed', d => console.log('AUTH-NEEDED: ', JSON.stringify(d)));
+    this.client.on('auth-not-needed', d => console.log('AUTH-NOT-NEEDED: ', JSON.stringify(d)));
+    this.client.on('response', d => console.log('RESPONSE: ', JSON.stringify(d)));
   }
 
-  async getAllChats() {
-    await this.client.tg.getAllChats();
+  connect() {
+    console.log('CONNECTING');
+    return this.client.connect();
   }
 
-  constructor() {}
+  login() {
+    const phonePromise = new Promise(res => {
+      if (this.phoneForLogin) {
+        res(this.phoneForLogin);
+      }
+    });
+    const codePromise = new Promise(res => {
+      if (this.codeForLogin) {
+        res(this.codeForLogin);
+      }
+    });
+    console.log('LOGGING IN');
+    this.client.login(() => ({
+      getPhoneNumber: retry =>
+        retry ? Promise.reject('Invalid phone number') : Promise.resolve('+447594751680'),
+      getAuthCode: retry =>
+        retry ? Promise.reject('Invalid auth code') : Promise.resolve('22222'),
+      // getPassword: (passwordHint, retry) =>
+      //   retry ? Promise.reject('Invalid password') : Promise.resolve('abcdef'),
+      // getName: () => Promise.resolve({ firstName: 'John', lastName: 'Doe' }),
+    }));
+  }
+
+  send(message) {
+    this.client.invoke(message);
+  }
 })();

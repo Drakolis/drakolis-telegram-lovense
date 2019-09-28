@@ -7,6 +7,12 @@ import {
   Switch,
   ListItemAvatar,
 } from '@material-ui/core';
+import styled from 'styled-components';
+
+const Scrollable = styled.div`
+  overflow: scroll;
+  height: 100%;
+`;
 
 export default class UserList extends Component {
   constructor() {
@@ -56,17 +62,23 @@ export default class UserList extends Component {
   render() {
     const { userlist } = this.state;
     return (
-      <List>
-        {userlist.map(user => (
-          <ListItem>
-            <ListItemAvatar />
-            <ListItemText>{user.username}</ListItemText>
-            <ListItemSecondaryAction>
-              <Switch checked={user.notify} onChange={() => this.switchUserById(user.id)} />
-            </ListItemSecondaryAction>
-          </ListItem>
-        ))}
-      </List>
+      <Scrollable>
+        <List>
+          {userlist.map(user => (
+            <ListItem>
+              <ListItemAvatar />
+              <ListItemText>{user.username}</ListItemText>
+              <ListItemSecondaryAction>
+                <Switch
+                  color="primary"
+                  checked={user.notify}
+                  onChange={() => this.switchUserById(user.id)}
+                />
+              </ListItemSecondaryAction>
+            </ListItem>
+          ))}
+        </List>
+      </Scrollable>
     );
   }
 }

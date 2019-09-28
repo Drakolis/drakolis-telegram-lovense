@@ -14,7 +14,7 @@ const store = createStore(reducers, applyMiddleware(promiseMiddleware));
 
 ReactDOM.render(
   <Provider store={store}>
-    <ThemeProvider theme={theme} injectFirst>
+    <ThemeProvider theme={theme}>
       {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
       <CssBaseline />
       <App />
